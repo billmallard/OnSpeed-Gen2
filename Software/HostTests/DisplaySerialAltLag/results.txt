@@ -1,0 +1,12 @@
+ONSPEED: 1778 sentences, byte offsets changed: [17, 18, 19, 20, 76, 77]
+G3X: 1778 sentences, byte offsets changed: none
+
+format   version  climb lag (ft)  behind at level-off +0/+5/+10/+20 s (ft)  level jitter (ft, 1 sd)
+G3X      base              173.7    152.0    95.0    60.0    23.0             0.36
+G3X      new               173.7    152.0    95.0    60.0    23.0             0.36
+ONSPEED  base              173.7    152.0    95.0    60.0    23.0             0.36
+ONSPEED  new                 0.3      1.0     1.0     0.0     1.0             0.50
+
+Kalman filter alone, climb lag: -0.2 ft
+
+PASS
