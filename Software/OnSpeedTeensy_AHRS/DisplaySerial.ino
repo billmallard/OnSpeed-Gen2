@@ -18,6 +18,8 @@ if (serialOutPort!="NONE" && millis()-serialoutLastUpdate>100) // update every 1
 #else
   displayIAS=IAS;
 #endif      
+              // PaltSmoothed (time constant ~10 s at 10 Hz) is sent in the G3X format only. The ONSPEED format sends kalmanAlt as is:
+              // the extra smoothing put its altitude ~170 ft behind at 1000 fpm, too late for an EFIS to use as altitude.
               if (PaltSmoothed==0) PaltSmoothed=kalmanAlt*M2FT; else PaltSmoothed=kalmanAlt*M2FT * smoothingAlphaVert/10+ (1-smoothingAlphaVert/10)*PaltSmoothed; // increased smoothing needed
               VerticalGSmoothed=aVertCorr * smoothingAlphaVert+ (1-smoothingAlphaVert)*VerticalGSmoothed;
               displayVerticalG=ceil(VerticalGSmoothed * 10.0);
@@ -57,7 +59,7 @@ if (serialOutPort!="NONE" && millis()-serialoutLastUpdate>100) // update every 1
                         // 2 - Pitch, 4 bytes, 0.1 degree, positive = up
                         // 6 - Roll, 5 bytes, 0.1 degree, positive = right
                         // 11 - IAS, 4 bytes, 0.1 kts
-                        // 15 - PALT, 6 bytes, 1 ft
+                        // 15 - PALT, 6 bytes, 1 ft, Kalman-filtered pressure altitude (no display smoothing)
                         // 21 - Rate of Turn,  5 bytes, .1 deg/sec, positive = right
                         // 26 - Lateral G, 3 bytes , 0.01g, positive = leftward
                         // 29 - VerticalG, 3 bytes, 0.1g, positive = upward
@@ -106,7 +108,7 @@ if (serialOutPort!="NONE" && millis()-serialoutLastUpdate>100) // update every 1
                         int spinRecoveryCue=0;
                         int OATc=0;
                         //Serial.printf("AOA: %.1f,pecentlift: %i\n",displayAOA,percentLift);
-                        sprintf(serialOutString,"#1%+04i%+05i%04u%+06i%+05i%+03i%+03i%02u%+04i%+04i%+03i%+04i%+03i%+04i%+04i%+04i%+04i%+04i%+02i%02u",int(smoothedPitch*10),int(smoothedRoll*10),unsigned(displayIAS*10),int(PaltSmoothed),int(gYaw*10),int(-LateralGSmoothed*100),displayVerticalG,unsigned(percentLift),int(displayAOA*10),int(floor(kalmanVSI*MPS2FPM/10)),int(OATc),int (flightPath*10),int(flapsPos),int(stallWarningAOA*10),int(onSpeedAOAslow*10),int(onSpeedAOAfast*10),int(LDmaxAOA*10),int(gOnsetRate*100),int(spinRecoveryCue),unsigned(dataMark));                        
+                        sprintf(serialOutString,"#1%+04i%+05i%04u%+06i%+05i%+03i%+03i%02u%+04i%+04i%+03i%+04i%+03i%+04i%+04i%+04i%+04i%+04i%+02i%02u",int(smoothedPitch*10),int(smoothedRoll*10),unsigned(displayIAS*10),int(kalmanAlt*M2FT),int(gYaw*10),int(-LateralGSmoothed*100),displayVerticalG,unsigned(percentLift),int(displayAOA*10),int(floor(kalmanVSI*MPS2FPM/10)),int(OATc),int (flightPath*10),int(flapsPos),int(stallWarningAOA*10),int(onSpeedAOAslow*10),int(onSpeedAOAfast*10),int(LDmaxAOA*10),int(gOnsetRate*100),int(spinRecoveryCue),unsigned(dataMark));                        
                         serialCRC=0x00;
                         for (int i=0;i<=75;i++) serialCRC+=serialOutString[i];                       
                         }
